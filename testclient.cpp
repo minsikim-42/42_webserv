@@ -17,6 +17,11 @@ void	set_sockaddr(sockaddr_in *address)
 
 int main(int argc, char *argv[])
 {
+	if (argc == 1)
+	{
+		std::cerr << "Please input message\n";
+		exit(0);
+	}
 	sockaddr_in	serv_add;
 	char	buffer[1024] = {0};
 

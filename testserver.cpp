@@ -27,6 +27,7 @@ int main()
 {
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	sockaddr_in	address;
+	int listen_fd;
 
 	if (server_fd <= 0)
 	{
@@ -35,18 +36,21 @@ int main()
 	}
 
 	set_sockaddr(&address);
+
 	int	address_len = sizeof(address);
-	if (bind(server_fd, (sockaddr *)&address, address_len)) // (socklen_t)sizeof
+	if (bind(server_fd, (sockaddr *)&address, address_len) < 0) // (socklen_t)sizeof
 	{
-		std::cerr << "bind error" << std::endl;
+		std::cerr << "bind error " << bind(server_fd, (sockaddr *)&address, address_len) << std::endl;
 		return 0;
 	}
 
-	if (listen(server_fd, 3) < 0)
+	if ((listen_fd = listen(server_fd, 10)) < 0)
 	{
 		std::cerr << "listen error" << std::endl;
 		exit(0); // why exit?
 	}
+	int optvalue = 1;
+	setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &optvalue, sizeof(optvalue)); // for bind error(Not fixxed)
 
 	while(1)
 	{
@@ -66,7 +70,7 @@ int main()
 		int	valread = read(acc_socket, buffer, 1024);
 		std::cout << buffer << std::endl;
 
-		std::string	hello = "THIS MESSAGE WOULD BE CHANGED"; // IMPORTANT!!
+		std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world! minsikim is genius"; // IMPORTANT!!
 
 		write(acc_socket, hello.c_str(), hello.length());
 
