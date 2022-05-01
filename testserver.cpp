@@ -11,10 +11,11 @@
 
 #include <memory>
 #include <iostream>
+#include <string>
 
 #define PORT 4242
 
-void	set_sockaddr(sockaddr_in *address)
+void set_sockaddr(sockaddr_in *address)
 {
 	// memset((char *)address, 0, sizeof(*address)); // ?
 	address->sin_family = AF_INET;
@@ -26,7 +27,7 @@ void	set_sockaddr(sockaddr_in *address)
 int main()
 {
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-	sockaddr_in	address;
+	sockaddr_in address;
 	int listen_fd;
 
 	if (server_fd <= 0)
@@ -37,9 +38,10 @@ int main()
 
 	set_sockaddr(&address);
 
-	int	address_len = sizeof(address);
-	if (bind(server_fd, (sockaddr *)&address, address_len) < 0) // (socklen_t)sizeof
+	int address_len = sizeof(address);
+	if (int ret = bind(server_fd, (sockaddr *)&address, address_len) < 0) // (socklen_t)sizeof
 	{
+		std::cout << ret << std::endl;
 		std::cerr << "bind error " << bind(server_fd, (sockaddr *)&address, address_len) << std::endl;
 		return 0;
 	}
@@ -52,12 +54,12 @@ int main()
 	int optvalue = 1;
 	setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &optvalue, sizeof(optvalue)); // for bind error(Not fixxed)
 
-	while(1)
+	while (1)
 	{
 		std::cout << "waiting for new connection...\n";
 		int acc_socket;
-		if ((acc_socket = accept(server_fd, // block fn
-							(sockaddr *)&address, (socklen_t *)&address_len)) < 0) //
+		if ((acc_socket = accept(server_fd,												// block fn
+								 (sockaddr *)&address, (socklen_t *)&address_len)) < 0) //
 		{
 			std::cerr << "accept error" << std::endl;
 			exit(0);
@@ -66,11 +68,16 @@ int main()
 		std::cout << "Connected!\n";
 		////////////////////// Conneted!!!
 
-		char	buffer[1024] = {0};
-		int	valread = read(acc_socket, buffer, 1024);
-		std::cout << buffer << std::endl;
+		char request[1024] = {0};
+		int valread = read(acc_socket, request, 1024);
+		std::string str_buf = request;
+		std::cout << str_buf << std::endl;
 
-		std::string	hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world! minsikim is genius"; // IMPORTANT!!
+		std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: ";
+		hello += std::to_string(str_buf.length() + 16);
+		std::cout << std::to_string(str_buf.length()) << std::endl;
+		hello += "\n\nyour request :\n\n";
+		hello += str_buf; // IMPORTANT!!
 
 		write(acc_socket, hello.c_str(), hello.length());
 

@@ -8,7 +8,7 @@
 
 #define PORT 4242
 
-void	set_sockaddr(sockaddr_in *address)
+void set_sockaddr(sockaddr_in *address)
 {
 	memset((char *)address, 0, sizeof(*address)); // ?
 	address->sin_family = AF_INET;
@@ -22,13 +22,13 @@ int main(int argc, char *argv[])
 		std::cerr << "Please input message\n";
 		exit(0);
 	}
-	sockaddr_in	serv_add;
-	char	buffer[1024] = {0};
+	sockaddr_in serv_add;
+	char buffer[1024] = {0};
 
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
 
 	set_sockaddr(&serv_add);
-	int	address_len = sizeof(serv_add);
+	int address_len = sizeof(serv_add);
 
 	if (inet_pton(AF_INET, "127.0.0.1", &serv_add.sin_addr) <= 0)
 	{
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	std::string	bo = argv[1];
+	std::string bo = argv[1];
 
 	send(sock, bo.c_str(), bo.length(), 0);
 	std::cout << "message '" << bo << "' send!" << std::endl;
